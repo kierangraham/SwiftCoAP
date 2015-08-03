@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import CocoaAsyncSocket
 
 //MARK:
 //MARK: SC Server Delegate Protocol implementation
