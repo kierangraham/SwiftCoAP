@@ -41,14 +41,14 @@ class ExampleViewController: UIViewController {
         if sender is UIButton {
             view.endEditing(true)
         }
-        var m = SCMessage(code: SCCodeValue(classValue: 0, detailValue: 01)!, type: .Confirmable, payload: "test".dataUsingEncoding(NSUTF8StringEncoding))
+        let m = SCMessage(code: SCCodeValue(classValue: 0, detailValue: 01)!, type: .Confirmable, payload: "test".dataUsingEncoding(NSUTF8StringEncoding))
         
-        if let stringData = uriPathTextField.text.dataUsingEncoding(NSUTF8StringEncoding) {
+        if let stringData = uriPathTextField.text?.dataUsingEncoding(NSUTF8StringEncoding) {
             m.addOption(SCOption.UriPath.rawValue, data: stringData)
         }
         
-        if let port = portTextField.text?.toInt() {
-            coapClient.sendCoAPMessage(m, hostName: hostTextField.text, port: UInt16(port))
+        if let portString = portTextField.text, hostString = hostTextField.text, port = UInt16(portString) {
+            coapClient.sendCoAPMessage(m, hostName:hostString,  port: port)
         }
         else {
             textView.text = "\(textView.text)\nInvalid PORT"
@@ -89,14 +89,6 @@ extension ExampleViewController: SCClientDelegate {
             }
 
             optString += "\(optName) (\(key))"
-
-            //Add this lines to display the respective option values in the message log
-            /*
-            for value in valueArray {
-                optString += "\(value)\n"
-            }
-            optString += separatorLine
-            */
         }
         textView.text = separatorLine + firstPartString + optString + separatorLine + textView.text
     }

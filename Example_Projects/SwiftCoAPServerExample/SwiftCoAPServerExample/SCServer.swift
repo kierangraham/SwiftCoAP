@@ -94,7 +94,7 @@ class SCServer: NSObject {
     convenience init?(port: UInt16) {
         self.init()
         
-        if !start(port: port) {
+        if !start(port) {
             return nil //UDP Setup failed
         }
     }
@@ -106,12 +106,10 @@ class SCServer: NSObject {
         if udpSocket == nil {
             udpSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue: dispatch_get_main_queue())
             
-            var error: NSError?
-            if !udpSocket!.bindToPort(port, error: &error) {
-                return false
-            }
-            
-            if !udpSocket!.beginReceiving(&error) {
+            do {
+                try udpSocket!.bindToPort(port)
+                try udpSocket!.beginReceiving()
+            } catch {
                 return false
             }
         }
@@ -186,7 +184,8 @@ class SCServer: NSObject {
             sendMessage(message)
             
             if var contextArray = pendingMessagesForEndpoints[addressData] {
-                contextArray.append((message, timer))
+                let newTuple: (SCMessage, NSTimer?) = (message, timer)
+                contextArray += [newTuple]
                 pendingMessagesForEndpoints[addressData] = contextArray
             }
             else {
@@ -407,7 +406,7 @@ class SCServer: NSObject {
                         valueArray[index] = (message.token, msgAddr, newSequenceNumber, prefferredBlock2SZX)
                     }
                     else {
-                        valueArray.append((message.token, msgAddr, 0, prefferredBlock2SZX))
+                        valueArray += [(message.token, msgAddr, 0, prefferredBlock2SZX)]
                     }
                     newValueArray = valueArray
                 }

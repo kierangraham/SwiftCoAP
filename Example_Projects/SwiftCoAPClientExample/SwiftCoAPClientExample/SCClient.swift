@@ -234,14 +234,13 @@ class SCClient: NSObject {
     private func setUpUdpSocket() -> Bool {
         udpSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue: dispatch_get_main_queue())
         
-        var error: NSError?
-        if !udpSocket!.bindToPort(5683, error: &error) {
+        do {
+            try udpSocket!.bindToPort(5683)
+            try udpSocket!.beginReceiving()
+        } catch {
             return false
         }
         
-        if !udpSocket!.beginReceiving(&error) {
-            return false
-        }
         return true
     }
     
@@ -298,7 +297,7 @@ class SCClient: NSObject {
         }
     }
     
-    private func sendBlock1MessageForCurrentContext(#payload: NSData, blockValue: UInt) {
+    private func sendBlock1MessageForCurrentContext(payload payload: NSData, blockValue: UInt) {
         let blockMessage = SCMessage(code: messageInTransmission.code, type: messageInTransmission.type, payload: payload)
         blockMessage.options = messageInTransmission.options
         blockMessage.blockBody = messageInTransmission.blockBody
@@ -341,7 +340,6 @@ class SCClient: NSObject {
 
 extension SCClient: GCDAsyncUdpSocketDelegate {
     func udpSocket(sock: GCDAsyncUdpSocket!, didReceiveData data: NSData!, fromAddress address: NSData!, withFilterContext filterContext: AnyObject!) {
-        println("Client received data: \(data)")
         
         if let message = SCMessage.fromData(data) {
             //Invalidate Timer
