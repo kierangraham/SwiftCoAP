@@ -336,7 +336,7 @@ public class SCClient: NSObject {
 // MARK: SC Client Extension
 // MARK: GCD Async Udp Socket Delegate
 
-public extension SCClient: GCDAsyncUdpSocketDelegate {
+extension SCClient: GCDAsyncUdpSocketDelegate {
     public func udpSocket(sock: GCDAsyncUdpSocket!, didReceiveData data: NSData!, fromAddress address: NSData!, withFilterContext filterContext: AnyObject!) {
 
         if let message = SCMessage.fromData(data) {

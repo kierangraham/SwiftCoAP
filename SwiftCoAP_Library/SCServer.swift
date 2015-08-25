@@ -15,19 +15,19 @@ import CocoaAsyncSocket
 public protocol SCServerDelegate {
 
     //Tells the delegate that an error occured during or before transmission (refer to the "SCServerErrorCode" Enum)
-    public func swiftCoapServer(server: SCServer, didFailWithError error: NSError)
+    func swiftCoapServer(server: SCServer, didFailWithError error: NSError)
 
     //Tells the delegate that a request on a particular resource was successfully handled and a response was or will be provided with the given response code
-    public func swiftCoapServer(server: SCServer, didHandleRequestWithCode requestCode: SCCodeValue, forResource resource: SCResourceModel, withResponseCode responseCode: SCCodeValue)
+    func swiftCoapServer(server: SCServer, didHandleRequestWithCode requestCode: SCCodeValue, forResource resource: SCResourceModel, withResponseCode responseCode: SCCodeValue)
 
     //Tells the delegate that a recently received request with a uripath was rejected with a particular reponse (error) code (e.g. Method Not Allowed, Not Found, etc.)
-    public func swiftCoapServer(server: SCServer, didRejectRequestWithCode requestCode: SCCodeValue, forPath path: String, withResponseCode responseCode: SCCodeValue)
+    func swiftCoapServer(server: SCServer, didRejectRequestWithCode requestCode: SCCodeValue, forPath path: String, withResponseCode responseCode: SCCodeValue)
 
     //Tells the delegate that a separate response was processed
-    public func swiftCoapServer(server: SCServer, didSendSeparateResponseMessage: SCMessage, number: Int)
+    func swiftCoapServer(server: SCServer, didSendSeparateResponseMessage: SCMessage, number: Int)
 
     //Tells the delegate that all registered observers for the particular resource will be notified due to a change of its data representation
-    public func swiftCoapServer(server: SCServer, willUpdatedObserversForResource resource: SCResourceModel)
+    func swiftCoapServer(server: SCServer, willUpdatedObserversForResource resource: SCResourceModel)
 }
 
 
@@ -512,7 +512,7 @@ public class SCServer: NSObject {
     }
 }
 
-public extension SCServer: GCDAsyncUdpSocketDelegate {
+extension SCServer: GCDAsyncUdpSocketDelegate {
     public func udpSocket(sock: GCDAsyncUdpSocket!, didReceiveData data: NSData!, fromAddress address: NSData!, withFilterContext filterContext: AnyObject!) {
         if let message = SCMessage.fromData(data) {
             message.addressData = address
