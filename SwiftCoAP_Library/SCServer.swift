@@ -12,29 +12,29 @@ import CocoaAsyncSocket
 //MARK:
 //MARK: SC Server Delegate Protocol implementation
 
-protocol SCServerDelegate {
-    
+public protocol SCServerDelegate {
+
     //Tells the delegate that an error occured during or before transmission (refer to the "SCServerErrorCode" Enum)
-    func swiftCoapServer(server: SCServer, didFailWithError error: NSError)
-    
+    public func swiftCoapServer(server: SCServer, didFailWithError error: NSError)
+
     //Tells the delegate that a request on a particular resource was successfully handled and a response was or will be provided with the given response code
-    func swiftCoapServer(server: SCServer, didHandleRequestWithCode requestCode: SCCodeValue, forResource resource: SCResourceModel, withResponseCode responseCode: SCCodeValue)
-    
+    public func swiftCoapServer(server: SCServer, didHandleRequestWithCode requestCode: SCCodeValue, forResource resource: SCResourceModel, withResponseCode responseCode: SCCodeValue)
+
     //Tells the delegate that a recently received request with a uripath was rejected with a particular reponse (error) code (e.g. Method Not Allowed, Not Found, etc.)
-    func swiftCoapServer(server: SCServer, didRejectRequestWithCode requestCode: SCCodeValue, forPath path: String, withResponseCode responseCode: SCCodeValue)
-    
+    public func swiftCoapServer(server: SCServer, didRejectRequestWithCode requestCode: SCCodeValue, forPath path: String, withResponseCode responseCode: SCCodeValue)
+
     //Tells the delegate that a separate response was processed
-    func swiftCoapServer(server: SCServer, didSendSeparateResponseMessage: SCMessage, number: Int)
-    
+    public func swiftCoapServer(server: SCServer, didSendSeparateResponseMessage: SCMessage, number: Int)
+
     //Tells the delegate that all registered observers for the particular resource will be notified due to a change of its data representation
-    func swiftCoapServer(server: SCServer, willUpdatedObserversForResource resource: SCResourceModel)
+    public func swiftCoapServer(server: SCServer, willUpdatedObserversForResource resource: SCResourceModel)
 }
 
 
 //MARK:
 //MARK: SC Allowed Route Enumeration
 
-enum SCAllowedRoute: UInt {
+public enum SCAllowedRoute: UInt {
     case Get = 0b1
     case Post = 0b10
     case Put = 0b100
@@ -45,10 +45,10 @@ enum SCAllowedRoute: UInt {
 //MARK:
 //MARK: SC Server Error Code Enumeration
 
-enum SCServerErrorCode: Int {
+public enum SCServerErrorCode: Int {
     case UdpSocketSendError, ReceivedInvalidMessageError, NoResponseExpectedError
-    
-    func descriptionString() -> String {
+
+    public func descriptionString() -> String {
         switch self {
         case .UdpSocketSendError:
             return "Failed to send data via UDP"
@@ -64,48 +64,48 @@ enum SCServerErrorCode: Int {
 //MARK:
 //MARK: SC Server IMPLEMENTATION
 
-class SCServer: NSObject {
-    
+public class SCServer: NSObject {
+
     //MARK: Properties
-    
-    
+
+
     //INTERNAL PROPERTIES (allowed to modify)
-    
-    var delegate: SCServerDelegate?
-    var autoBlock2SZX: UInt? = 2 { didSet { if let newValue = autoBlock2SZX { autoBlock2SZX = min(6, newValue) } } } //If not nil, Block2 transfer will be used automatically when the payload size exceeds the value 2^(autoBlock2SZX + 4). Valid Values: 0-6.
-    var autoWellKnownCore = true //If set to true, the server will automatically provide responses for the resource "well-known/core" with its current resources.
-    lazy var resources = [SCResourceModel]()
-    
+
+    public var delegate: SCServerDelegate?
+    public var autoBlock2SZX: UInt? = 2 { didSet { if let newValue = autoBlock2SZX { autoBlock2SZX = min(6, newValue) } } } //If not nil, Block2 transfer will be used automatically when the payload size exceeds the value 2^(autoBlock2SZX + 4). Valid Values: 0-6.
+    public var autoWellKnownCore = true //If set to true, the server will automatically provide responses for the resource "well-known/core" with its current resources.
+    public lazy var resources = [SCResourceModel]()
+
     //PRIVATE PROPERTIES
-    
+
     private var udpSocket: GCDAsyncUdpSocket!
     private var udpSocketTag: Int = 0
-    
+
     private lazy var pendingMessagesForEndpoints = [NSData : [(SCMessage, NSTimer?)]]()
     private lazy var registeredObserverForResource = [SCResourceModel : [(UInt64, NSData, UInt, UInt?)]]() //Token, Address, SequenceNumber, PrefferedBlock2SZX
     private lazy var block1UploadsForEndpoints = [NSData : [(SCResourceModel, UInt, NSData?)]]()
-    
-    
+
+
     //MARK: Internal Methods (allowed to use)
-    
-    
+
+
     //Convenience initializer (failable): Starts server on initialization.
-    
-    convenience init?(port: UInt16) {
+
+    public convenience init?(port: UInt16) {
         self.init()
-        
+
         if !start(port) {
             return nil //UDP Setup failed
         }
     }
-    
-    
+
+
     //Start server manually, with the given port
-    
-    func start(port: UInt16 = 5683) -> Bool {
+
+    public func start(port: UInt16 = 5683) -> Bool {
         if udpSocket == nil {
             udpSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue: dispatch_get_main_queue())
-            
+
             do {
                 try udpSocket!.bindToPort(port)
                 try udpSocket!.beginReceiving()
@@ -113,43 +113,43 @@ class SCServer: NSObject {
                 return false
             }
         }
-        
+
         return true
     }
-    
-    
+
+
     //Close UDP socket and server ativity
-    
-    func close() {
+
+    public func close() {
         udpSocket?.close()
         udpSocket = nil
     }
-    
-    
+
+
     //Reset Context Information
-    
-    func reset() {
+
+    public func reset() {
         pendingMessagesForEndpoints = [:]
         registeredObserverForResource = [:]
         block1UploadsForEndpoints = [:]
         resources = []
     }
-    
-    
+
+
     //Call this method when your resource is ready to process a separate response. The concerned resource must return true for the method `willHandleDataAsynchronouslyForGet(...)`. It is necessary to pass the original message and the resource (both received in `willHandleDataAsynchronouslyForGet`) so that the server is able to retrieve the current context. Additionay, you have to pass the typical "values" tuple which form the response (as described in SCMessage -> SCResourceModel)
-    
-    func didCompleteAsynchronousRequestForOriginalMessage(message: SCMessage, resource: SCResourceModel, values:(statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)) {
+
+    public func didCompleteAsynchronousRequestForOriginalMessage(message: SCMessage, resource: SCResourceModel, values:(statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)) {
         let type: SCType = message.type == .Confirmable ? .Confirmable : .NonConfirmable
         if let separateMessage = createMessageForValues((values.statusCode, values.payloadData, values.contentFormat, nil), withType: type, relatedMessage: message, requestedResource: resource) {
             separateMessage.messageId = UInt16(arc4random_uniform(0xFFFF) &+ 1)
             setupReliableTransmissionOfMessage(separateMessage, forResource: resource)
         }
     }
-    
-    
+
+
     //Call this method when the given resource has updated its data representation in order to notify all registered users (and has "observable" set to true)
-    
-    func updateRegisteredObserversForResource(resource: SCResourceModel) {
+
+    public func updateRegisteredObserversForResource(resource: SCResourceModel) {
         if var valueArray = registeredObserverForResource[resource] {
             for var i = 0; i < valueArray.count; i++ {
                 let (token, address, sequenceNumber, prefferredBlock2SZX) = valueArray[i]
@@ -168,10 +168,10 @@ class SCServer: NSObject {
         }
         delegate?.swiftCoapServer(self, willUpdatedObserversForResource: resource)
     }
-    
-    
+
+
     // MARK: Private Methods
-    
+
     private func setupReliableTransmissionOfMessage(message: SCMessage, forResource resource: SCResourceModel) {
         if let addressData = message.addressData {
             var timer: NSTimer!
@@ -182,7 +182,7 @@ class SCServer: NSObject {
                 NSRunLoop.currentRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
             }
             sendMessage(message)
-            
+
             if var contextArray = pendingMessagesForEndpoints[addressData] {
                 let newTuple: (SCMessage, NSTimer?) = (message, timer)
                 contextArray += [newTuple]
@@ -193,7 +193,7 @@ class SCServer: NSObject {
             }
         }
     }
-    
+
     private func sendMessageWithType(type: SCType, code: SCCodeValue, payload: NSData?, messageId: UInt16, addressData: NSData, token: UInt64 = 0, options: [Int: [NSData]]! = nil) {
         let emptyMessage = SCMessage(code: code, type: type, payload: payload)
         emptyMessage.messageId = messageId
@@ -204,15 +204,15 @@ class SCServer: NSObject {
         }
         sendMessage(emptyMessage)
     }
-    
+
     private func sendMessage(message: SCMessage) {
         udpSocket?.sendData(message.toData()!, toAddress: message.addressData, withTimeout: 0, tag: udpSocketTag)
         udpSocketTag = (udpSocketTag % Int.max) + 1
     }
-    
-    
+
+
     //Actually PRIVATE! Do not call from outside. Has to be internally visible as NSTimer won't find it otherwise
-    
+
     func handleRetransmission(timer: NSTimer) {
         let retransmissionCount = timer.userInfo!["retransmissionCount"] as! Int
         let totalTime = timer.userInfo!["totalTime"] as! Double
@@ -220,7 +220,7 @@ class SCServer: NSObject {
         let resource = timer.userInfo!["resource"] as! SCResourceModel
         sendMessage(message)
         delegate?.swiftCoapServer(self, didSendSeparateResponseMessage: message, number: retransmissionCount)
-        
+
         if let addressData = message.addressData, var contextArray = pendingMessagesForEndpoints[addressData] {
             let nextTimer: NSTimer
             if retransmissionCount < SCMessage.kMaxRetransmit {
@@ -231,7 +231,7 @@ class SCServer: NSObject {
                 nextTimer = NSTimer(timeInterval: SCMessage.kMaxTransmitWait - totalTime, target: self, selector: Selector("notifyNoResponseExpected:"), userInfo: ["message" : message, "resource" : resource], repeats: false)
             }
             NSRunLoop.currentRunLoop().addTimer(nextTimer, forMode: NSRunLoopCommonModes)
-            
+
             //Update context
             for var i = 0; i < contextArray.count; i++ {
                 let tuple = contextArray[i]
@@ -243,25 +243,25 @@ class SCServer: NSObject {
             }
         }
     }
-    
-    
+
+
     //Actually PRIVATE! Do not call from outside. Has to be internally visible as NSTimer won't find it otherwise
-    
+
     func notifyNoResponseExpected(timer: NSTimer)  {
         let message = timer.userInfo!["message"] as! SCMessage
         let resource = timer.userInfo!["resource"] as! SCResourceModel
-        
+
         removeContextForMessage(message)
         notifyDelegateWithErrorCode(.NoResponseExpectedError)
-        
+
         if message.options[SCOption.Observe.rawValue] != nil, let address = message.addressData {
             deregisterObserveForResource(resource, address: address)
         }
     }
-    
+
     private func removeContextForMessage(message: SCMessage) {
         if let addressData = message.addressData, var contextArray = pendingMessagesForEndpoints[addressData] {
-            
+
             func removeFromContextAtIndex(index: Int) {
                 contextArray.removeAtIndex(index)
                 if contextArray.count > 0 {
@@ -271,7 +271,7 @@ class SCServer: NSObject {
                     pendingMessagesForEndpoints.removeValueForKey(addressData)
                 }
             }
-            
+
             for var i = 0; i < contextArray.count; i++ {
                 let tuple = contextArray[i]
                 if tuple.0.messageId == message.messageId {
@@ -287,11 +287,11 @@ class SCServer: NSObject {
             }
         }
     }
-    
+
     private func notifyDelegateWithErrorCode(clientErrorCode: SCServerErrorCode) {
         delegate?.swiftCoapServer(self, didFailWithError: NSError(domain: SCMessage.kCoapErrorDomain, code: clientErrorCode.rawValue, userInfo: [NSLocalizedDescriptionKey : clientErrorCode.descriptionString()]))
     }
-    
+
     private func handleBlock2ServerRequirementsForMessage(message: SCMessage, preferredBlockSZX: UInt?) {
         var req = autoBlock2SZX
         if let adjustedSZX = preferredBlockSZX {
@@ -302,7 +302,7 @@ class SCServer: NSObject {
                 req = adjustedSZX
             }
         }
-        
+
         if let activeBlock2SZX = req, currentPayload = message.payload where currentPayload.length > Int(pow(2, Double(4 + activeBlock2SZX))) {
             let blockValue = UInt(activeBlock2SZX) + 8
             var byteArray = blockValue.toByteArray()
@@ -310,15 +310,15 @@ class SCServer: NSObject {
             message.payload = currentPayload.subdataWithRange(NSMakeRange(0, Int(pow(2, Double(activeBlock2SZX + 4)))))
         }
     }
-    
+
     private func createMessageForValues(values: (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!), withType type: SCType, relatedMessage message: SCMessage, requestedResource resource: SCResourceModel) -> SCMessage? {
         let responseMessage = SCMessage(code: values.statusCode, type: type, payload: values.payloadData)
-        
+
         if values.contentFormat != nil {
             var contentFormatByteArray = values.contentFormat.rawValue.toByteArray()
             responseMessage.addOption(SCOption.ContentFormat.rawValue, data: NSData(bytes: &contentFormatByteArray, length: contentFormatByteArray.count))
         }
-        
+
         if values.locationUri != nil {
             if let (pathDataArray, queryDataArray) = SCMessage.getPathAndQueryDataArrayFromUriString(values.locationUri) where pathDataArray.count > 0 {
                 responseMessage.options[SCOption.LocationPath.rawValue] = pathDataArray
@@ -327,30 +327,30 @@ class SCServer: NSObject {
                 }
             }
         }
-        
+
         if message.code == SCCodeValue(classValue: 0, detailValue: 01) {
             if resource.maxAgeValue != nil {
                 var byteArray = resource.maxAgeValue.toByteArray()
                 responseMessage.addOption(SCOption.MaxAge.rawValue, data: NSData(bytes: &byteArray, length: byteArray.count))
             }
-            
+
             if resource.etag != nil  {
                 responseMessage.addOption(SCOption.Etag.rawValue, data: resource.etag)
             }
         }
-        
+
         //Block 2
         if let block2ValueArray = message.options[SCOption.Block2.rawValue], block2Data = block2ValueArray.first {
             var actualValue = UInt.fromData(block2Data)
             var requestedBlockSZX = min(actualValue & 0b111, 6)
             actualValue >>= 4
-            
+
             if let activeBlock2SZX = autoBlock2SZX where activeBlock2SZX < requestedBlockSZX {
                 requestedBlockSZX = activeBlock2SZX
             }
-            
+
             let fixedByteSize = pow(2, Double(requestedBlockSZX + 4))
-            
+
             if let currentPayload = values.payloadData {
                 let blocksCount = UInt(ceil(Double(currentPayload.length) / fixedByteSize))
                 if actualValue >= blocksCount {
@@ -377,12 +377,12 @@ class SCServer: NSObject {
         else {
             handleBlock2ServerRequirementsForMessage(responseMessage, preferredBlockSZX: nil)
         }
-        
+
         //Block 1
         if let block1ValueArray = message.options[SCOption.Block1.rawValue] {
             responseMessage.options[SCOption.Block1.rawValue] = block1ValueArray //Echo the option
         }
-        
+
         //Observe
         if resource.observable, let observeValueArray = message.options[SCOption.Observe.rawValue], observeValue = observeValueArray.first, msgAddr = message.addressData {
             if observeValue.length > 0 && UInt.fromData(observeValue) == 1 {
@@ -397,7 +397,7 @@ class SCServer: NSObject {
                     let blockValue = UInt.fromData(block2Data)
                     prefferredBlock2SZX = blockValue & 0b111
                 }
-                
+
                 if var valueArray = registeredObserverForResource[resource] {
                     if let index = getIndexOfObserverInValueArray(valueArray, address: msgAddr) {
                         let (_, _, sequenceNumber, _) = valueArray[index]
@@ -413,21 +413,21 @@ class SCServer: NSObject {
                 else {
                     newValueArray = [(message.token, msgAddr, 0, prefferredBlock2SZX)]
                 }
-                
+
                 registeredObserverForResource[resource] = newValueArray
                 var byteArray = currentSequenceNumber.toByteArray()
                 responseMessage.addOption(SCOption.Observe.rawValue, data: NSData(bytes: &byteArray, length: byteArray.count))
             }
         }
-        
-        
+
+
         responseMessage.messageId = message.messageId
         responseMessage.token = message.token
         responseMessage.addressData = message.addressData
-        
+
         return responseMessage
     }
-    
+
     private func deregisterObserveForResource(resource: SCResourceModel, address: NSData) {
         if var valueArray = registeredObserverForResource[resource], let index = getIndexOfObserverInValueArray(valueArray, address: address) {
             valueArray.removeAtIndex(index)
@@ -439,7 +439,7 @@ class SCServer: NSObject {
             }
         }
     }
-    
+
     private func getIndexOfObserverInValueArray(valueArray: [(UInt64, NSData, UInt, UInt?)], address: NSData) -> Int? {
         for var i = 0; i < valueArray.count; i++ {
             let (_, add, _, _) = valueArray[i]
@@ -449,10 +449,10 @@ class SCServer: NSObject {
         }
         return nil
     }
-    
+
     private func retrievePayloadAfterBlock1HandlingWithMessage(message: SCMessage, resultResource: SCResourceModel) -> NSData? {
         var currentPayload = message.payload
-        
+
         if let block1ValueArray = message.options[SCOption.Block1.rawValue], blockData = block1ValueArray.first, address = message.addressData {
             let blockAsInt = UInt.fromData(blockData)
             let blockNumber = blockAsInt >> 4
@@ -467,7 +467,7 @@ class SCServer: NSObject {
                         let newPayload = NSMutableData(data: storedPayload ?? NSData())
                         newPayload.appendData(message.payload ?? NSData())
                         currentPayload = newPayload
-                        
+
                         if blockAsInt & 8 == 8 {
                             //more bit is set: Store Information
                             uploadArray[i] = (resource, sequenceNumber + 1, currentPayload)
@@ -503,8 +503,8 @@ class SCServer: NSObject {
         }
         return currentPayload
     }
-    
-    func respondWithErrorCode(responseCode: SCCodeValue, diagnosticPayload: NSData?, forMessage message: SCMessage, withType type: SCType) {
+
+    public func respondWithErrorCode(responseCode: SCCodeValue, diagnosticPayload: NSData?, forMessage message: SCMessage, withType type: SCType) {
         if let address = message.addressData {
             sendMessageWithType(type, code: responseCode, payload: diagnosticPayload, messageId: message.messageId, addressData: address, token: message.token)
             delegate?.swiftCoapServer(self, didRejectRequestWithCode: message.code, forPath: message.completeUriPath(), withResponseCode: responseCode)
@@ -512,13 +512,13 @@ class SCServer: NSObject {
     }
 }
 
-extension SCServer: GCDAsyncUdpSocketDelegate {
-    func udpSocket(sock: GCDAsyncUdpSocket!, didReceiveData data: NSData!, fromAddress address: NSData!, withFilterContext filterContext: AnyObject!) {
+public extension SCServer: GCDAsyncUdpSocketDelegate {
+    public func udpSocket(sock: GCDAsyncUdpSocket!, didReceiveData data: NSData!, fromAddress address: NSData!, withFilterContext filterContext: AnyObject!) {
         if let message = SCMessage.fromData(data) {
             message.addressData = address
-            
+
             //Filter
-            
+
             var resultType: SCType
             switch message.type {
             case .Confirmable:
@@ -529,16 +529,16 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
                 removeContextForMessage(message)
                 return
             }
-            
+
             if message.code == SCCodeValue(classValue: 0, detailValue: 00) || message.code.classValue >= 1 {
                 if message.type == .Confirmable || message.type == .NonConfirmable {
                     sendMessageWithType(.Reset, code: SCCodeValue(classValue: 0, detailValue: 00)!, payload: nil, messageId: message.messageId, addressData: address)
                 }
                 return
             }
-            
+
             //URI-Path
-            
+
             var resultResource: SCResourceModel!
             let completeUri =  message.completeUriPath()
             if completeUri == ".well-known/core" && autoWellKnownCore {
@@ -571,10 +571,10 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
                     }
                 }
             }
-            
+
             if resultResource != nil {
                 var resultTuple: (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)?
-                
+
                 switch message.code {
                 case SCCodeValue(classValue: 0, detailValue: 01)! where resultResource.allowedRoutes & SCAllowedRoute.Get.rawValue == SCAllowedRoute.Get.rawValue:
                     //ETAG verification
@@ -587,7 +587,7 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
                             }
                         }
                     }
-                    
+
                     if resultResource.willHandleDataAsynchronouslyForGet(queryDictionary: message.uriQueryDictionary(), options: message.options, originalMessage: message) {
                         if message.type == .Confirmable {
                             sendMessageWithType(.Acknowledgement, code: SCCodeValue(classValue: 0, detailValue: 00)!, payload: nil, messageId: message.messageId, addressData: address)
@@ -624,7 +624,7 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
                     respondWithErrorCode(SCCodeSample.MethodNotAllowed.codeValue(), diagnosticPayload: "Method Not Allowed".dataUsingEncoding(NSUTF8StringEncoding), forMessage: message, withType: resultType)
                     return
                 }
-                
+
                 if let finalTuple = resultTuple, responseMessage = createMessageForValues(finalTuple, withType: resultType, relatedMessage: message, requestedResource: resultResource) {
                     sendMessage(responseMessage)
                     delegate?.swiftCoapServer(self, didHandleRequestWithCode: message.code, forResource: resultResource, withResponseCode: responseMessage.code)
@@ -638,8 +638,8 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
             }
         }
     }
-    
-    func udpSocket(sock: GCDAsyncUdpSocket!, didNotSendDataWithTag tag: Int, dueToError error: NSError!) {
+
+    public func udpSocket(sock: GCDAsyncUdpSocket!, didNotSendDataWithTag tag: Int, dueToError error: NSError!) {
         notifyDelegateWithErrorCode(.UdpSocketSendError)
     }
 }
