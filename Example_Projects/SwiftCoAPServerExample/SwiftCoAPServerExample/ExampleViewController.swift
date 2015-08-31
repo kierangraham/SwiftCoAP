@@ -10,7 +10,7 @@ import UIKit
 
 class ExampleViewController: UIViewController {
 
-    let myServer: SCServer? = SCServer()
+  let myServer: SCServer? = SCServer()
     let kDefaultCellIdentifier = "DefaultCell"
 
     @IBOutlet weak var tableView: UITableView!
@@ -23,7 +23,7 @@ class ExampleViewController: UIViewController {
 
         myServer?.delegate = self
         myServer?.autoBlock2SZX = 1
-        myServer?.start()
+        myServer?.start(5684, bindToMulticastGroup: "224.27.39.26")
 
         tableView.contentInset = UIEdgeInsetsMake(64.0, 0, 0, 0)
         tableView.estimatedRowHeight = 44.0

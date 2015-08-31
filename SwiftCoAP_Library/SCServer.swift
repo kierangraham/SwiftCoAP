@@ -102,13 +102,16 @@ public class SCServer: NSObject {
 
     //Start server manually, with the given port
 
-    public func start(port: UInt16 = 5683) -> Bool {
+    public func start(port: UInt16 = 5683, bindToMulticastGroup multicast: String? = nil) -> Bool {
         if udpSocket == nil {
             udpSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue: dispatch_get_main_queue())
 
             do {
                 try udpSocket!.bindToPort(port)
                 try udpSocket!.beginReceiving()
+                if let multicast = multicast {
+                  try udpSocket!.joinMulticastGroup(multicast)
+                }
             } catch {
                 return false
             }

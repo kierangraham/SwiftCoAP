@@ -12,10 +12,10 @@ import UIKit
 //MARK:
 //MARK: SC Type Enumeration: Represents the CoAP types
 
-enum SCType: Int {
+public enum SCType: Int {
     case Confirmable, NonConfirmable, Acknowledgement, Reset
-    
-    func shortString() -> String {
+
+    public func shortString() -> String {
         switch self {
         case .Confirmable:
             return "CON"
@@ -27,8 +27,8 @@ enum SCType: Int {
             return "RST"
         }
     }
-    
-    static func fromShortString(string: String) -> SCType? {
+
+    public static func fromShortString(string: String) -> SCType? {
         switch string.uppercaseString {
         case "CON":
             return .Confirmable
@@ -48,7 +48,7 @@ enum SCType: Int {
 //MARK:
 //MARK: SC Option Enumeration: Represents the CoAP options
 
-enum SCOption: Int {
+public enum SCOption: Int {
     case IfMatch = 1
     case UriHost = 3
     case Etag = 4
@@ -68,14 +68,14 @@ enum SCOption: Int {
     case ProxyUri = 35
     case ProxyScheme = 39
     case Size1 = 60
-    
-    static let allValues = [IfMatch, UriHost, Etag, IfNoneMatch, Observe, UriPort, LocationPath, UriPath, ContentFormat, MaxAge, UriQuery, Accept, LocationQuery, Block2, Block1, Size2, ProxyUri, ProxyScheme, Size1]
-    
-    enum Format: Int {
+
+    public static let allValues = [IfMatch, UriHost, Etag, IfNoneMatch, Observe, UriPort, LocationPath, UriPath, ContentFormat, MaxAge, UriQuery, Accept, LocationQuery, Block2, Block1, Size2, ProxyUri, ProxyScheme, Size1]
+
+    public enum Format: Int {
         case Empty, Opaque, UInt, String
     }
-    
-    func toString() -> String {
+
+    public func toString() -> String {
         switch self {
         case .IfMatch:
             return "If_Match"
@@ -117,32 +117,32 @@ enum SCOption: Int {
             return "Size1"
         }
     }
-    
-    static func isNumberCritical(optionNo: Int) -> Bool {
+
+    public static func isNumberCritical(optionNo: Int) -> Bool {
         return optionNo % 2 == 1
     }
-    
-    func isCritical() -> Bool {
+
+    public func isCritical() -> Bool {
         return SCOption.isNumberCritical(self.rawValue)
     }
-    
-    static func isNumberUnsafe(optionNo: Int) -> Bool {
+
+    public static func isNumberUnsafe(optionNo: Int) -> Bool {
         return optionNo & 0b10 == 0b10
     }
-    
-    func isUnsafe() -> Bool {
+
+    public func isUnsafe() -> Bool {
         return SCOption.isNumberUnsafe(self.rawValue)
     }
-    
-    static func isNumberNoCacheKey(optionNo: Int) -> Bool {
+
+    public static func isNumberNoCacheKey(optionNo: Int) -> Bool {
         return optionNo & 0b11110 == 0b11100
     }
-    
-    func isNoCacheKey() -> Bool {
+
+    public func isNoCacheKey() -> Bool {
         return SCOption.isNumberNoCacheKey(self.rawValue)
     }
-    
-    static func isNumberRepeatable(optionNo: Int) -> Bool {
+
+    public static func isNumberRepeatable(optionNo: Int) -> Bool {
         switch optionNo {
         case SCOption.IfMatch.rawValue, SCOption.Etag.rawValue, SCOption.LocationPath.rawValue, SCOption.UriPath.rawValue, SCOption.UriQuery.rawValue, SCOption.LocationQuery.rawValue:
             return true
@@ -150,12 +150,12 @@ enum SCOption: Int {
             return false
         }
     }
-    
-    func isRepeatable() -> Bool {
+
+    public func isRepeatable() -> Bool {
         return SCOption.isNumberRepeatable(self.rawValue)
     }
-    
-    func format() -> Format {
+
+    public func format() -> Format {
         switch self {
         case .IfNoneMatch:
             return .Empty
@@ -167,12 +167,12 @@ enum SCOption: Int {
             return .UInt
         }
     }
-    
-    func dataForValueString(valueString: String) -> NSData? {
+
+    public func dataForValueString(valueString: String) -> NSData? {
         return SCOption.dataForOptionValueString(valueString, format: format())
     }
-    
-    static func dataForOptionValueString(valueString: String, format: Format) -> NSData? {
+
+    public static func dataForOptionValueString(valueString: String, format: Format) -> NSData? {
         switch format {
         case .Empty:
             return nil
@@ -194,7 +194,7 @@ enum SCOption: Int {
 //MARK:
 //MARK: SC Code Sample Enumeration: Provides the most common CoAP codes as raw values
 
-enum SCCodeSample: Int {
+public enum SCCodeSample: Int {
     case Empty = 0
     case Get = 1
     case Post = 2
@@ -223,12 +223,12 @@ enum SCCodeSample: Int {
     case ServiceUnavailable = 163
     case GatewayTimeout = 164
     case ProxyingNotSupported = 165
-    
-    func codeValue() -> SCCodeValue! {
+
+    public func codeValue() -> SCCodeValue! {
         return SCCodeValue.fromCodeSample(self)
     }
-    
-    func toString() -> String {
+
+    public func toString() -> String {
         switch self {
         case .Empty:
             return "Empty"
@@ -288,8 +288,8 @@ enum SCCodeSample: Int {
             return "Proxying Not Supported"
         }
     }
-    
-    static func stringFromCodeValue(codeValue: SCCodeValue) -> String? {
+
+    public static func stringFromCodeValue(codeValue: SCCodeValue) -> String? {
         return codeValue.toCodeSample()?.toString()
     }
 }
@@ -298,7 +298,7 @@ enum SCCodeSample: Int {
 //MARK:
 //MARK: SC Content Format Enumeration
 
-enum SCContentFormat: UInt {
+public enum SCContentFormat: UInt {
     case Plain = 0
     case LinkFormat = 40
     case XML = 41
@@ -306,8 +306,8 @@ enum SCContentFormat: UInt {
     case EXI = 47
     case JSON = 50
     case CBOR = 60
-    
-    func needsStringUTF8Conversion() -> Bool {
+
+    public func needsStringUTF8Conversion() -> Bool {
         switch self {
         case .OctetStream, .EXI, .CBOR:
             return false
@@ -315,8 +315,8 @@ enum SCContentFormat: UInt {
             return true
         }
     }
-    
-    func toString() -> String {
+
+    public func toString() -> String {
         switch self {
         case .Plain:
             return "Plain"
@@ -340,45 +340,45 @@ enum SCContentFormat: UInt {
 //MARK:
 //MARK: SC Code Value struct: Represents the CoAP code. You can easily apply the CoAP code syntax c.dd (e.g. SCCodeValue(classValue: 0, detailValue: 01) equals 0.01)
 
-struct SCCodeValue: Equatable {
-    let classValue: UInt8
-    let detailValue: UInt8
-    
-    init(rawValue: UInt8) {
+public struct SCCodeValue: Equatable {
+    public let classValue: UInt8
+    public let detailValue: UInt8
+
+    public init(rawValue: UInt8) {
         let firstBits: UInt8 = rawValue >> 5
         let lastBits: UInt8 = rawValue & 0b00011111
         self.classValue = firstBits
         self.detailValue = lastBits
     }
-    
+
     //classValue must not be larger than 7; detailValue must not be larger than 31
-    init?(classValue: UInt8, detailValue: UInt8) {
+    public init?(classValue: UInt8, detailValue: UInt8) {
         if classValue > 0b111 || detailValue > 0b11111 { return nil }
-        
+
         self.classValue = classValue
         self.detailValue = detailValue
     }
-    
-    func toRawValue() -> UInt8 {
+
+    public func toRawValue() -> UInt8 {
         return classValue << 5 + detailValue
     }
-    
-    func toCodeSample() -> SCCodeSample? {
+
+    public func toCodeSample() -> SCCodeSample? {
         if let code = SCCodeSample(rawValue: Int(toRawValue())) {
             return code
         }
         return nil
     }
-    
-    static func fromCodeSample(code: SCCodeSample) -> SCCodeValue {
+
+    public static func fromCodeSample(code: SCCodeSample) -> SCCodeValue {
         return SCCodeValue(rawValue: UInt8(code.rawValue))
     }
-    
-    func toString() -> String {
+
+    public func toString() -> String {
         return String(format: "%i.%02d", classValue, detailValue)
     }
-    
-    func requestString() -> String? {
+
+    public func requestString() -> String? {
         switch self {
         case SCCodeValue(classValue: 0, detailValue: 01)!:
             return "GET"
@@ -394,7 +394,7 @@ struct SCCodeValue: Equatable {
     }
 }
 
-func ==(lhs: SCCodeValue, rhs: SCCodeValue) -> Bool {
+public func ==(lhs: SCCodeValue, rhs: SCCodeValue) -> Bool {
     return lhs.classValue == rhs.classValue && lhs.detailValue == rhs.detailValue
 }
 
@@ -403,7 +403,7 @@ func ==(lhs: SCCodeValue, rhs: SCCodeValue) -> Bool {
 //MARK: UInt Extension
 
 public extension UInt {
-    func toByteArray() -> [UInt8] {
+    public func toByteArray() -> [UInt8] {
         let byteLength = UInt(ceil(log2(Double(self + 1)) / 8))
         var byteArray = [UInt8]()
         for var i: UInt = 0; i < byteLength; i++ {
@@ -411,11 +411,11 @@ public extension UInt {
         }
         return byteArray
     }
-    
-    static func fromData(data: NSData) -> UInt {
+
+    public static func fromData(data: NSData) -> UInt {
         var valueBytes = [UInt8](count: data.length, repeatedValue: 0)
         data.getBytes(&valueBytes, length: data.length)
-        
+
         var actualValue: UInt = 0
         for var i = 0; i < valueBytes.count; i++ {
             actualValue += UInt(valueBytes[i]) << ((UInt(valueBytes.count) - UInt(i + 1)) * 8)
@@ -427,8 +427,8 @@ public extension UInt {
 //MARK:
 //MARK: String Extension
 
-extension String {
-    static func toHexFromData(data: NSData) -> String {
+public extension String {
+    public static func toHexFromData(data: NSData) -> String {
         var string = data.description.stringByReplacingOccurrencesOfString(" ", withString: "")
         return "0x" + string.substringWithRange(Range<String.Index>(start: advance(string.startIndex, 1), end: advance(string.endIndex, -1)))
     }
@@ -437,8 +437,8 @@ extension String {
 //MARK:
 //MARK: NSData Extension
 
-extension NSData {
-    static func fromOpaqueString(string: String) -> NSData? {
+public extension NSData {
+    public static func fromOpaqueString(string: String) -> NSData? {
         let comps = string.componentsSeparatedByString("x")
         if let lastString = comps.last, number = UInt(lastString, radix:16) where comps.count <= 2 {
             var byteArray = number.toByteArray()
@@ -451,107 +451,107 @@ extension NSData {
 //MARK:
 //MARK: Resource Implementation, used for SCServer
 
-class SCResourceModel: NSObject {
-    let name: String // Name of the resource
-    let allowedRoutes: UInt // Bitmask of allowed routes (see SCAllowedRoutes enum)
-    var maxAgeValue: UInt! // If not nil, every response will contain the provided MaxAge value
+public class SCResourceModel: NSObject {
+    public let name: String // Name of the resource
+    public let allowedRoutes: UInt // Bitmask of allowed routes (see SCAllowedRoutes enum)
+    public var maxAgeValue: UInt! // If not nil, every response will contain the provided MaxAge value
     private(set) var etag: NSData! // If not nil, every response to a GET request will contain the provided eTag. The etag is generated automatically whenever you update the dataRepresentation of the resource
-    var dataRepresentation: NSData! {
+    public var dataRepresentation: NSData! {
         didSet {
             if var hashInt = dataRepresentation?.hashValue {
                 etag = NSData(bytes: &hashInt, length: sizeof(Int))
             }
         }
     }// The current data representation of the resource. Needs to stay up to date
-    var observable = false // If true, a response will contain the Observe option, and endpoints will be able to register as observers in SCServer. Call updateRegisteredObserversForResource(self), anytime your dataRepresentation changes.
-    
+    public var observable = false // If true, a response will contain the Observe option, and endpoints will be able to register as observers in SCServer. Call updateRegisteredObserversForResource(self), anytime your dataRepresentation changes.
+
     //Desigated initializer
-    init(name: String, allowedRoutes: UInt) {
+    public init(name: String, allowedRoutes: UInt) {
         self.name = name
         self.allowedRoutes = allowedRoutes
     }
-    
-    
+
+
     //The Methods for Data reception for allowed routes. SCServer will call the appropriate message upon the reception of a reqeuest. Override the respective methods, which match your allowedRoutes.
     //SCServer passes a queryDictionary containing the URI query content (e.g ["user_id": "23"]) and all options contained in the respective request. The POST and PUT methods provide the message's payload as well.
     //Refer to the example resources in the SwiftCoAPServerExample project for implementation examples.
-    
-    
+
+
     //This method lets you decide whether the current GET request shall be processed asynchronously, i.e. if true will be returned, an empty ACK will be sent, and you can provide the actual response by calling the servers "didCompleteAsynchronousRequestForOriginalMessage(...)". Note: "dataForGet" will not be called additionally if you return true.
-    func willHandleDataAsynchronouslyForGet(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], originalMessage: SCMessage) -> Bool { return false }
-    
+    public func willHandleDataAsynchronouslyForGet(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], originalMessage: SCMessage) -> Bool { return false }
+
     //The following methods require data for the given routes GET, POST, PUT, DELETE and must be overriden if needed. If you return nil, the server will respond with a "Method not allowed" error code (Make sure that you have set the allowed routes in the "allowedRoutes" bitmask property).
     //You have to return a tuple with a statuscode, optional payload, optional content format for your provided payload and (in case of POST and PUT) an optional locationURI.
-    func dataForGet(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]]) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)? { return nil }
-    func dataForPost(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], requestData: NSData?) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)? { return nil }
-    func dataForPut(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], requestData: NSData?) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)? { return nil }
-    func dataForDelete(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]]) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)? { return nil }
+    public func dataForGet(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]]) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)? { return nil }
+    public func dataForPost(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], requestData: NSData?) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)? { return nil }
+    public func dataForPut(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]], requestData: NSData?) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)? { return nil }
+    public func dataForDelete(queryDictionary queryDictionary: [String : String], options: [Int : [NSData]]) -> (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!)? { return nil }
 }
 
 //MARK:
 //MARK: SC Message IMPLEMENTATION
 
-class SCMessage: NSObject {
-    
+public class SCMessage: NSObject {
+
     //MARK: Constants and Properties
-    
+
     //CONSTANTS
-    static let kCoapVersion = 0b01
-    static let kProxyCoAPTypeKey = "COAP_TYPE"
-    
-    static let kCoapErrorDomain = "SwiftCoapErrorDomain"
-    static let kAckTimeout = 2.0
-    static let kAckRandomFactor = 1.5
-    static let kMaxRetransmit = 4
-    static let kMaxTransmitWait = 93.0
-    
-    let kDefaultMaxAgeValue: UInt = 60
-    let kOptionOneByteExtraValue: UInt8 = 13
-    let kOptionTwoBytesExtraValue: UInt8 = 14
-    
+    public static let kCoapVersion = 0b01
+    public static let kProxyCoAPTypeKey = "COAP_TYPE"
+
+    public static let kCoapErrorDomain = "SwiftCoapErrorDomain"
+    public static let kAckTimeout = 2.0
+    public static let kAckRandomFactor = 1.5
+    public static let kMaxRetransmit = 4
+    public static let kMaxTransmitWait = 93.0
+
+    public let kDefaultMaxAgeValue: UInt = 60
+    public let kOptionOneByteExtraValue: UInt8 = 13
+    public let kOptionTwoBytesExtraValue: UInt8 = 14
+
     //INTERNAL PROPERTIES (allowed to modify)
-    
-    var code: SCCodeValue = SCCodeValue(classValue: 0, detailValue: 0)! //Code value is Empty by default
-    var type: SCType = .Confirmable //Type is CON by default
-    var payload: NSData? //Add a payload (optional)
-    var blockBody: NSData? //Helper for Block1 tranmission. Used by SCClient, modification has no effect
-    
-    lazy var options = [Int: [NSData]]() //CoAP-Options. It is recommend to use the addOption(..) method to add a new option.
-    
-    
+
+    public var code: SCCodeValue = SCCodeValue(classValue: 0, detailValue: 0)! //Code value is Empty by default
+    public var type: SCType = .Confirmable //Type is CON by default
+    public var payload: NSData? //Add a payload (optional)
+    public var blockBody: NSData? //Helper for Block1 tranmission. Used by SCClient, modification has no effect
+
+    public lazy var options = [Int: [NSData]]() //CoAP-Options. It is recommend to use the addOption(..) method to add a new option.
+
+
     //The following properties are modified by SCClient/SCServer. Modification has no effect and is therefore not recommended
-    var hostName: String?
-    var port: UInt16?
-    var addressData: NSData?
-    var resourceForConfirmableResponse: SCResourceModel?
-    var messageId: UInt16!
-    var token: UInt64 = 0
-    
-    var timeStamp: NSDate?
-    
-    
+    public var hostName: String?
+    public var port: UInt16?
+    public var addressData: NSData?
+    public var resourceForConfirmableResponse: SCResourceModel?
+    public var messageId: UInt16!
+    public var token: UInt64 = 0
+
+    public var timeStamp: NSDate?
+
+
     //MARK: Internal Methods (allowed to use)
-    
-    convenience init(code: SCCodeValue, type: SCType, payload: NSData?) {
+
+    public convenience init(code: SCCodeValue, type: SCType, payload: NSData?) {
         self.init()
         self.code = code
         self.type = type
         self.payload = payload
     }
-    
-    func equalForCachingWithMessage(message: SCMessage) -> Bool {
+
+    public func equalForCachingWithMessage(message: SCMessage) -> Bool {
         if code == message.code && hostName == message.hostName && port == message.port {
             let firstSet = Set(options.keys)
             let secondSet = Set(message.options.keys)
-            
+
             let exOr = firstSet.exclusiveOr(secondSet)
-            
+
             for optNo in exOr {
                 if !(SCOption.isNumberNoCacheKey(optNo)) { return false }
             }
-            
+
             let interSect = firstSet.intersect(secondSet)
-            
+
             for optNo in interSect {
                 if !(SCOption.isNumberNoCacheKey(optNo)) && !(SCMessage.compareOptionValueArrays(options[optNo]!, second: message.options[optNo]!)) { return false }
             }
@@ -559,18 +559,18 @@ class SCMessage: NSObject {
         }
         return false
     }
-    
-    static func compareOptionValueArrays(first: [NSData], second: [NSData]) -> Bool {
+
+    public static func compareOptionValueArrays(first: [NSData], second: [NSData]) -> Bool {
         if first.count != second.count { return false }
-        
+
         for var i = 0; i < first.count; i++ {
             if !first[i].isEqualToData(second[i]) { return false }
         }
-        
+
         return true
     }
-    
-    static func copyFromMessage(message: SCMessage) -> SCMessage {
+
+    public static func copyFromMessage(message: SCMessage) -> SCMessage {
         let copiedMessage = SCMessage(code: message.code, type: message.type, payload: message.payload)
         copiedMessage.options = message.options
         copiedMessage.hostName = message.hostName
@@ -580,8 +580,8 @@ class SCMessage: NSObject {
         copiedMessage.timeStamp = message.timeStamp
         return copiedMessage
     }
-    
-    func isFresh() -> Bool {
+
+    public func isFresh() -> Bool {
         func validateMaxAge(value: UInt) -> Bool {
             if timeStamp != nil {
                 let expirationDate = timeStamp!.dateByAddingTimeInterval(Double(value))
@@ -589,15 +589,15 @@ class SCMessage: NSObject {
             }
             return false
         }
-        
+
         if let maxAgeValues = options[SCOption.MaxAge.rawValue], firstData = maxAgeValues.first {
             return validateMaxAge(UInt.fromData(firstData))
         }
-        
+
         return validateMaxAge(kDefaultMaxAgeValue)
     }
-    
-    func addOption(option: Int, data: NSData) {
+
+    public func addOption(option: Int, data: NSData) {
         if var currentOptionValue = options[option] {
             currentOptionValue.append(data)
             options[option] = currentOptionValue
@@ -606,10 +606,10 @@ class SCMessage: NSObject {
             options[option] = [data]
         }
     }
-    
-    func toData() -> NSData? {
+
+    public func toData() -> NSData? {
         var resultData: NSMutableData
-        
+
         let tokenLength = Int(ceil(log2(Double(token + 1)) / 8))
         if tokenLength > 8 {
             return nil
@@ -619,7 +619,7 @@ class SCMessage: NSObject {
         let actualMessageId: UInt16 = messageId ?? 0
         var byteArray: [UInt8] = [firstByte, codeRawValue, UInt8(actualMessageId >> 8), UInt8(actualMessageId & 0xFF)]
         resultData = NSMutableData(bytes: &byteArray, length: byteArray.count)
-        
+
         if tokenLength > 0 {
             var tokenByteArray = [UInt8]()
             for var i = 0; i < tokenLength; i++ {
@@ -627,26 +627,26 @@ class SCMessage: NSObject {
             }
             resultData.appendBytes(&tokenByteArray, length: tokenLength)
         }
-        
+
         let sortedOptions = options.sort {
             $0.0 < $1.0
         }
-        
+
         var previousDelta = 0
         for (key, valueArray) in sortedOptions {
             for value in valueArray {
                 let optionDelta = key - previousDelta
                 previousDelta += optionDelta
-                
+
                 var optionFirstByte: UInt8
                 var extendedDelta: NSData?
                 var extendedLength: NSData?
-                
+
                 if optionDelta >= Int(kOptionTwoBytesExtraValue) + 0xFF {
                     optionFirstByte = kOptionTwoBytesExtraValue << 4
                     let extendedDeltaValue: UInt16 = UInt16(optionDelta) - (UInt16(kOptionTwoBytesExtraValue) + 0xFF)
                     var extendedByteArray: [UInt8] = [UInt8(extendedDeltaValue >> 8), UInt8(extendedDeltaValue & 0xFF)]
-                    
+
                     extendedDelta = NSData(bytes: &extendedByteArray, length: extendedByteArray.count)
                 }
                 else if optionDelta >= Int(kOptionOneByteExtraValue) {
@@ -657,12 +657,12 @@ class SCMessage: NSObject {
                 else {
                     optionFirstByte = UInt8(optionDelta) << 4
                 }
-                
+
                 if value.length >= Int(kOptionTwoBytesExtraValue) + 0xFF {
                     optionFirstByte += kOptionTwoBytesExtraValue
                     let extendedLengthValue: UInt16 = UInt16(value.length) - (UInt16(kOptionTwoBytesExtraValue) + 0xFF)
                     var extendedByteArray: [UInt8] = [UInt8(extendedLengthValue >> 8), UInt8(extendedLengthValue & 0xFF)]
-                    
+
                     extendedLength = NSData(bytes: &extendedByteArray, length: extendedByteArray.count)
                 }
                 else if value.length >= Int(kOptionOneByteExtraValue) {
@@ -673,7 +673,7 @@ class SCMessage: NSObject {
                 else {
                     optionFirstByte += UInt8(value.length)
                 }
-                
+
                 resultData.appendBytes(&optionFirstByte, length: 1)
                 if extendedDelta != nil {
                     resultData.appendData(extendedDelta!)
@@ -681,11 +681,11 @@ class SCMessage: NSObject {
                 if extendedLength != nil {
                     resultData.appendData(extendedLength!)
                 }
-                
+
                 resultData.appendData(value)
             }
         }
-        
+
         if payload != nil {
             var payloadMarker: UInt8 = 0xFF
             resultData.appendBytes(&payloadMarker, length: 1)
@@ -693,27 +693,27 @@ class SCMessage: NSObject {
         }
         return resultData
     }
-    
-    static func fromData(data: NSData) -> SCMessage? {
+
+    public static func fromData(data: NSData) -> SCMessage? {
         if data.length < 4 { return nil }
         //Unparse Header
         var parserIndex = 4
         var headerBytes = [UInt8](count: parserIndex, repeatedValue: 0)
         data.getBytes(&headerBytes, length: parserIndex)
-        
+
         var firstByte = headerBytes[0]
         let tokenLenght = Int(firstByte) & 0xF
         firstByte >>= 4
         let type = SCType(rawValue: Int(firstByte) & 0b11)
         firstByte >>= 2
         if tokenLenght > 8 || type == nil || firstByte != UInt8(kCoapVersion)  { return nil }
-        
+
         //Assign header values to CoAP Message
         let message = SCMessage()
         message.type = type!
         message.code = SCCodeValue(rawValue: headerBytes[1])
         message.messageId = (UInt16(headerBytes[2]) << 8) + UInt16(headerBytes[3])
-        
+
         if tokenLenght > 0 {
             var tokenByteArray = [UInt8](count: tokenLenght, repeatedValue: 0)
             data.getBytes(&tokenByteArray, range: NSMakeRange(4, tokenLenght))
@@ -722,13 +722,13 @@ class SCMessage: NSObject {
             }
         }
         parserIndex += tokenLenght
-        
+
         var currentOptDelta = 0
         while parserIndex < data.length {
             var nextByte: UInt8 = 0
             data.getBytes(&nextByte, range: NSMakeRange(parserIndex, 1))
             parserIndex++
-            
+
             if nextByte == 0xFF {
                 message.payload = data.subdataWithRange(NSMakeRange(parserIndex, data.length - parserIndex))
                 break
@@ -737,7 +737,7 @@ class SCMessage: NSObject {
                 let optLength = nextByte & 0xF
                 nextByte >>= 4
                 if nextByte == 0xF || optLength == 0xF { return nil }
-                
+
                 var finalDelta = 0
                 switch nextByte {
                 case 13:
@@ -770,7 +770,7 @@ class SCMessage: NSObject {
                 default:
                     finalLenght = Int(optLength)
                 }
-                
+
                 var optValue = NSData()
                 if finalLenght > 0 {
                     optValue = data.subdataWithRange(NSMakeRange(parserIndex, finalLenght))
@@ -779,16 +779,16 @@ class SCMessage: NSObject {
                 message.addOption(finalDelta, data: optValue)
             }
         }
-        
+
         return message
     }
-    
-    func toHttpUrlRequestWithUrl() -> NSMutableURLRequest {
+
+    public func toHttpUrlRequestWithUrl() -> NSMutableURLRequest {
         let urlRequest = NSMutableURLRequest()
         if code != SCCodeSample.Get.codeValue() {
             urlRequest.HTTPMethod = code.requestString()!
         }
-        
+
         for (key, valueArray) in options {
             for value in valueArray {
                 var fieldString: String
@@ -805,18 +805,18 @@ class SCMessage: NSObject {
                 else {
                     fieldString = ""
                 }
-                
+
                 if let optionName = SCOption(rawValue: key)?.toString().uppercaseString {
                     urlRequest.addValue(String(fieldString), forHTTPHeaderField: optionName)
                 }
             }
         }
         urlRequest.HTTPBody = payload
-        
+
         return urlRequest
     }
-    
-    static func fromHttpUrlResponse(urlResponse: NSHTTPURLResponse, data: NSData!) -> SCMessage {
+
+    public static func fromHttpUrlResponse(urlResponse: NSHTTPURLResponse, data: NSData!) -> SCMessage {
         let message = SCMessage()
         message.payload = data
         message.code = SCCodeValue(rawValue: UInt8(urlResponse.statusCode & 0xff))
@@ -845,8 +845,8 @@ class SCMessage: NSObject {
         }
         return message
     }
-    
-    func completeUriPath() -> String {
+
+    public func completeUriPath() -> String {
         var finalPathString: String = ""
         if let pathDataArray = options[SCOption.UriPath.rawValue] {
             for var i = 0; i < pathDataArray.count; i++ {
@@ -858,8 +858,8 @@ class SCMessage: NSObject {
         }
         return finalPathString
     }
-    
-    func uriQueryDictionary() -> [String : String] {
+
+    public func uriQueryDictionary() -> [String : String] {
         var resultDict = [String : String]()
         if let queryDataArray = options[SCOption.UriQuery.rawValue] {
             for queryData in queryDataArray {
@@ -873,9 +873,9 @@ class SCMessage: NSObject {
         }
         return resultDict
     }
-    
-    static func getPathAndQueryDataArrayFromUriString(uriString: String) -> (pathDataArray: [NSData], queryDataArray: [NSData])? {
-        
+
+    public static func getPathAndQueryDataArrayFromUriString(uriString: String) -> (pathDataArray: [NSData], queryDataArray: [NSData])? {
+
         func dataArrayFromString(string: String!, withSeparator separator: String) -> [NSData] {
             var resultDataArray = [NSData]()
             if string != nil {
@@ -888,30 +888,30 @@ class SCMessage: NSObject {
             }
             return resultDataArray
         }
-        
+
         let splitArray = uriString.componentsSeparatedByString("?")
-        
+
         if splitArray.count <= 2 {
             let resultPathDataArray = dataArrayFromString(splitArray.first, withSeparator: "/")
             let resultQueryDataArray = splitArray.count == 2 ? dataArrayFromString(splitArray.last, withSeparator: "&") : []
-            
+
             return (resultPathDataArray, resultQueryDataArray)
         }
         return nil
     }
-    
-    func inferredContentFormat() -> SCContentFormat {
+
+    public func inferredContentFormat() -> SCContentFormat {
         guard let contentFormatArray = options[SCOption.ContentFormat.rawValue], contentFormatData = contentFormatArray.first, contentFormat = SCContentFormat(rawValue: UInt.fromData(contentFormatData)) else { return .Plain }
         return contentFormat
     }
-    
-    func payloadRepresentationString() -> String {
+
+    public func payloadRepresentationString() -> String {
         guard let payloadData = self.payload else { return "" }
-        
+
         return SCMessage.payloadRepresentationStringForData(payloadData, contentFormat: inferredContentFormat())
     }
-    
-    static func payloadRepresentationStringForData(data: NSData, contentFormat: SCContentFormat) -> String {
+
+    public static func payloadRepresentationStringForData(data: NSData, contentFormat: SCContentFormat) -> String {
         if contentFormat.needsStringUTF8Conversion() {
             return (NSString(data: data, encoding: NSUTF8StringEncoding) as? String) ?? "Format Error"
         }
