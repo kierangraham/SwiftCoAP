@@ -430,7 +430,7 @@ public extension UInt {
 public extension String {
     public static func toHexFromData(data: NSData) -> String {
         var string = data.description.stringByReplacingOccurrencesOfString(" ", withString: "")
-        return "0x" + string.substringWithRange(Range<String.Index>(start: advance(string.startIndex, 1), end: advance(string.endIndex, -1)))
+        return "0x" + string.substringWithRange(Range<String.Index>(start: string.startIndex.advancedBy(1), end: string.endIndex.advancedBy(-1)))
     }
 }
 
