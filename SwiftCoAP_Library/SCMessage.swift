@@ -456,6 +456,7 @@ public class SCResourceModel: NSObject {
     public let allowedRoutes: UInt // Bitmask of allowed routes (see SCAllowedRoutes enum)
     public var maxAgeValue: UInt! // If not nil, every response will contain the provided MaxAge value
     private(set) var etag: NSData! // If not nil, every response to a GET request will contain the provided eTag. The etag is generated automatically whenever you update the dataRepresentation of the resource
+    public var message: SCMessage?
     public var dataRepresentation: NSData! {
         didSet {
             if var hashInt = dataRepresentation?.hashValue {

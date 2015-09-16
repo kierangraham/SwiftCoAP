@@ -576,6 +576,7 @@ extension SCServer: GCDAsyncUdpSocketDelegate {
             }
 
             if resultResource != nil {
+                resultResource.message = message
                 var resultTuple: (statusCode: SCCodeValue, payloadData: NSData?, contentFormat: SCContentFormat!, locationUri: String!)?
 
                 switch message.code {
